@@ -1,0 +1,112 @@
+# Copyright (c) 2025 LG Electronics, Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http:#www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# SPDX-License-Identifier: Apache-2.0
+
+{{- if .Values.LA.enabled }}
+{{- $range_end := .Values.env.LA_COUNT | int | add1 }}
+{{- $la_ids := untilStep 1 (int $range_end) 1 }}
+{{- range $index, $la_id_number := $la_ids }}
+{{- $la_id := print "la" $la_id_number }}
+---
+apiVersion: apps/v1
+
+kind: Deployment
+metadata:
+  name: "{{ $la_id }}-deployment"
+  labels:
+    project: {{ include "lgscms.fullname" $ }}
+    component: "{{ $la_id }}"
+    {{- include "lgscms.labels" $ | nindent 4 }}
+
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      component: "{{ $la_id }}"
+  template:
+    metadata:
+      labels:
+        project: {{ include "lgscms.fullname" $ }}
+        component: "{{ $la_id }}"
+    spec:
+      hostname: "{{ $la_id }}"
+      initContainers:
+      - name: wait-for-mysql-la{{ $la_id }}
+        image: alpine:3.16
+        command:
+        - sh
+        - -c
+        - 'while ! nc -z {{ $.Values.mysql.host }} {{ $.Values.mysql.port }} ; do echo "Waiting for MySQL is up"; sleep 1; done'
+      containers:
+      - name: "{{ $la_id }}"
+        image: "{{- $.Values.LA.image }}"
+        command: ["target/debug/la"]
+        imagePullPolicy: "{{- $.Values.global.imagePullPolicy }}"
+        ports:
+          - containerPort: {{ $.Values.env.LA_PORT | int }}
+            name: "{{ $la_id }}-http-api"
+        envFrom:
+          - secretRef:
+              name: infra-mysql
+          - configMapRef:
+              name: env-config
+        env:
+          - name: LA_ID
+            value: "{{ $la_id_number }}"
+          - name: MYSQL_DATABASE_NAME
+            value: "{{ $la_id }}db"
+          - name: USE_SECURITY_STRINGS_AND_LHS
+            value: "{{ $.Values.LA.use_security_strings_and_lhs }}"
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: "{{ $la_id }}"
+  labels:
+    project: {{ include "lgscms.fullname" $ }}
+    component: "{{ $la_id }}"
+
+spec:
+  selector:
+    component: "{{ $la_id }}"
+  ports:
+    - name: "{{ $la_id }}-service-port"
+      protocol: TCP
+      port: {{ $.Values.env.LA_PORT | int }}
+      targetPort: "{{ $la_id }}-http-api"
+
+{{ if $.Values.LA.external_service.enabled }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: "{{ $la_id }}-external-service"
+  labels:
+    app.lgscms/is-development: 'yes'
+    component: "{{ $la_id }}"
+spec:
+  type: LoadBalancer
+  selector:
+    component: "{{ $la_id }}"
+  ports:
+    - name: "{{ $la_id }}-external-service"
+      protocol: TCP
+      port: {{ $.Values.env.LA_PORT | int }}
+      nodePort: {{ add $.Values.LA.external_service.nodePortBase  $la_id_number }}
+      targetPort: "{{ $la_id }}-http-api"
+{{- end }}
+{{- end }}
+{{- end }}

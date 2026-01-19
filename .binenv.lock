@@ -1,0 +1,6 @@
+binenv=0.19.10
+helm=3.13.3
+kubectl=1.34
+kubeseal=0.24.5
+minikube=1.37.0
+skaffold=2.10.0

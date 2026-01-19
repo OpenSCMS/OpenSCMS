@@ -1,0 +1,84 @@
+// Copyright (c) 2025 LG Electronics, Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: Apache-2.0
+
+use sea_orm_migration::prelude::*;
+
+pub struct Migration;
+
+impl MigrationName for Migration {
+    fn name(&self) -> &str {
+        "m20240605_000001_create_event_scheduler" // Make sure this matches with the file name
+    }
+}
+
+#[async_trait::async_trait]
+impl MigrationTrait for Migration {
+    async fn up(&self, manager: &SchemaManager) -> Result<(), DbErr> {
+        let db = manager.get_connection();
+
+        // Use `execute_unprepared` if the SQL statement doesn't have value bindings
+        db.execute_unprepared(
+            r#"
+            -- Drop the event if it exists
+            DROP EVENT IF EXISTS DeleteExpiredFiles;
+
+            -- Create event to delete expired entries every day
+            CREATE EVENT DeleteExpiredFiles
+            ON SCHEDULE EVERY 1 DAY
+            DO
+            BEGIN
+                DECLARE initial_epoch_2004_01_01_00_00_00 INT DEFAULT 1072915200;
+                DECLARE epoch_now INT;
+                DECLARE current_time_seconds INT;
+                DECLARE current_time_period_days INT;
+
+                -- Get the current epoch time in seconds
+                SET epoch_now = UNIX_TIMESTAMP();
+
+                -- Calculate current time in seconds since 2004-01-01
+                SET current_time_seconds = epoch_now - initial_epoch_2004_01_01_00_00_00;
+
+                -- Calculate the current time period in days
+                SET current_time_period_days = FLOOR(current_time_seconds / (60 * 60 * 24));
+
+                -- Delete expired entries from certificate_store
+                DELETE FROM certificate_store WHERE (current_i < current_time_period_days AND downloaded = TRUE) OR ((current_time_period_days - current_i) > 30);
+
+                -- Delete expired entries from x_dot_info_store
+                DELETE FROM x_dot_info_store WHERE (current_i < current_time_period_days AND downloaded = TRUE) OR ((current_time_period_days - current_i) > 30);
+
+                -- Delete expired entries from successor_enrollment_certificate_table
+                DELETE FROM successor_enrollment_certificate_store WHERE (request_time_period < current_time_period_days AND enrollment_status = 'downloaded') OR ((current_time_period_days - request_time_period) > 30);
+            END;
+            "#,
+        )
+        .await?;
+
+        Ok(())
+    }
+
+    async fn down(&self, manager: &SchemaManager) -> Result<(), DbErr> {
+        manager
+            .get_connection()
+            .execute_unprepared(
+                r#"
+                DROP EVENT IF EXISTS DeleteExpiredFiles;
+                "#,
+            )
+            .await?;
+        Ok(())
+    }
+}

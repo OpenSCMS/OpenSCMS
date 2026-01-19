@@ -1,0 +1,13 @@
+# Obviously ignore the .git directory
+.git
+
+# target is the output directory for "cargo build"
+target
+
+# docker file might contain secrets
+Dockerfile
+
+# The deployment directory should (probably) not be copied as it might contain secrets.
+# It remains to be seen if this breaks the gitlab ci stuff.
+deployment/
+

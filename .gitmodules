@@ -1,0 +1,4 @@
+[submodule "oscms_bridge/oscms-codecs-bridge"]
+	path = oscms_bridge/oscms-codecs-bridge
+	url = ../oscms-codecs-bridge
+

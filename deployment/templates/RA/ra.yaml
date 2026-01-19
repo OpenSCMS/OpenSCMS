@@ -1,0 +1,178 @@
+# Copyright (c) 2025 LG Electronics, Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http:#www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# SPDX-License-Identifier: Apache-2.0
+
+{{- if .Values.RA.enabled }}
+---
+apiVersion: apps/v1
+
+kind: Deployment
+metadata:
+  name: ra-deployment
+  labels:
+    project: {{ include "lgscms.fullname" $ }}
+    component: "ra"
+    {{- include "lgscms.labels" $ | nindent 4 }}
+
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      component: "ra"
+  template:
+    metadata:
+      labels:
+        project: {{ include "lgscms.fullname" $ }}
+        component: "ra"
+    spec:
+      hostname: "ra"
+      initContainers:
+      - name: wait-for-mysql-ra
+        image: alpine:3.16
+        command:
+        - sh
+        - -c
+        - 'while ! nc -z {{ .Values.mysql.host }} {{ .Values.mysql.port }} ; do echo "Waiting for MySQL is up"; sleep 1; done'
+      - name: wait-for-rabbit-ra
+        image: busybox
+        command:
+        - sh
+        - -c
+        - 'while ! nc -z scmsrabbitmq 5672 ; do echo "Waiting for RabbitMQ to be up"; sleep 1; done'
+      containers:
+      - name: "ra"
+        image: "{{ .Values.RA.image }}"
+        command: ["target/debug/ra"]
+        imagePullPolicy: "{{ .Values.global.imagePullPolicy }}"
+        ports:
+          - containerPort: {{ .Values.env.RA_PORT | int }}
+            name: ra-http-api
+        envFrom:
+          - secretRef:
+              name: infra-mysql
+          - secretRef:
+              name: infra-rabbitmq
+          - configMapRef:
+              name: env-config
+        env:
+          - name: MYSQL_DATABASE_NAME
+            value: "{{ .Values.RA.database_name }}"
+          - name: MINIMUM_NUMBER_OF_REQUESTS
+            value: "{{ .Values.RA.env.MINIMUM_NUMBER_OF_REQUESTS }}"
+          - name: NUMBER_OF_BATCHES
+            value: "{{ .Values.RA.env.NUMBER_OF_BATCHES }}"
+          - name: RA_ID
+            value: "{{ .Values.RA.env.RA_ID }}"
+
+---
+apiVersion: apps/v1
+
+kind: Deployment
+metadata:
+  name: "ra-worker"
+  labels:
+    project: {{ include "lgscms.fullname" $ }}
+    component: "ra-worker"
+    {{- include "lgscms.labels" $ | nindent 4 }}
+
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      component: "ra-worker"
+  template:
+    metadata:
+      labels:
+        project: {{ include "lgscms.fullname" $ }}
+        component: "ra-worker"
+    spec:
+      hostname: "ra-worker"
+      initContainers:
+      - name: wait-for-mysql-ra-worker
+        image: alpine:3.16
+        command:
+        - sh
+        - -c
+        - 'while ! nc -z {{ .Values.mysql.host }} {{ .Values.mysql.port }} ; do echo "Waiting for MySQL is up"; sleep 1; done'
+      - name: wait-for-rabbit-ra
+        image: busybox
+        command:
+        - sh
+        - -c
+        - 'while ! nc -z scmsrabbitmq 5672 ; do echo "Waiting for RabbitMQ to be up"; sleep 1; done'
+      containers:
+      - name: "ra-worker"
+        image: "{{ .Values.RA.image }}"
+        command: ["target/debug/ra"]
+        args: ["worker"]
+        imagePullPolicy: "{{ .Values.global.imagePullPolicy }}"
+        envFrom:
+          - secretRef:
+              name: infra-mysql
+          - secretRef:
+              name: infra-rabbitmq
+          - configMapRef:
+              name: env-config
+        env:
+          - name: MYSQL_DATABASE_NAME
+            value: "{{ .Values.RA.database_name }}"
+          - name: MINIMUM_NUMBER_OF_REQUESTS
+            value: "{{ .Values.RA.env.MINIMUM_NUMBER_OF_REQUESTS }}"
+          - name: NUMBER_OF_BATCHES
+            value: "{{ .Values.RA.env.NUMBER_OF_BATCHES }}"
+          - name: RA_ID
+            value: "{{ .Values.RA.env.RA_ID }}"
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ra
+  labels:
+    project: {{ include "lgscms.fullname" $ }}
+    component: "ra"
+
+spec:
+  type: ClusterIP
+  selector:
+    component: "ra"
+  ports:
+    - name: "ra-service-port"
+      protocol: TCP
+      port: {{ .Values.env.RA_PORT | int }}
+      targetPort: ra-http-api
+
+{{ if .Values.RA.external_service.enabled }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ra-external-service
+  labels:
+    app.lgscms/is-development: 'yes'
+    component: ra
+spec:
+  type: LoadBalancer
+  selector:
+    component: ra
+  ports:
+    - name: ra-external-service
+      protocol: TCP
+      port: {{ .Values.env.RA_PORT | int }}
+      nodePort: {{ .Values.RA.external_service.nodePort | int }}
+      targetPort: ra-http-api
+{{- end }}
+
+{{- end }}

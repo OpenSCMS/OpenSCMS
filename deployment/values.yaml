@@ -1,0 +1,227 @@
+# Copyright (c) 2025 LG Electronics, Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http:#www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# SPDX-License-Identifier: Apache-2.0
+
+# Default values for lgscms.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# Common for all services and dependencies
+global:
+  imagePullPolicy: IfNotPresent
+
+# Everything declared in this section will end up in the env-config ConfigMap
+# which can be included in a pod using the following clause
+#   envFrom:
+#     - configMapRef
+#         name: env-config
+#
+# Items which are not needed by more than one pod should be declared in their own section
+#
+# Note that all values must be quoted (i.e. strings) and all names must be ALL_UPPER_CASE
+env:
+  # Identify the deployment environment. One of
+  # - minikube: Local minikube deployment
+  # - cloud-dev: development AWS cluster
+  # - cloud-staging: staging AWS cluster
+  # - cloud-production: production AWS cluster
+  DEPLOY_ENVIRONMENT: "minikube"
+
+  # Sets the default logging level for all services. see env_logger documentation for details
+  RUST_LOG: "debug"
+
+  # Valid values are "fine" or "coarse" and are case-sensitive
+  SCMS_V2_ERROR: "fine"
+
+  ACA_PORT: "5000"
+  CAM_PORT: "5000"
+  ECA_PORT: "5000"
+  RA_PORT: "5000"
+  LA_PORT: "5000"
+
+  LA_COUNT: "2"
+  CERTIFICATES_PER_BATCH: "10"
+  PERIOD_LENGTH_DAYS: "1"
+
+  CTL_SERIES_ID: "FFFFFFFFFFFFFF00"
+
+  # The path to the directory containing certificates and keys for components
+  ACA_CERTS_FOLDER: "/certs/aca"
+  ACA_CERTIFICATE_FILE: "acaCertificate.coer"
+  ACA_PRIVATE_KEY_FILE: "acaPrivateKey.dat"
+  ACA_PUBLIC_KEY_FILE: "acaPublicKey.dat"
+
+  RA_CERTS_FOLDER: "/certs/ra"
+  RA_CERTIFICATE_FILE: "raCertificate.coer"
+  RA_PRIVATE_KEY_FILE: "raPrivateKey.dat"
+  RA_PUBLIC_KEY_FILE: "raPublicKey.dat"
+  RA_ENC_PUBLIC_KEY_FILE: "raEncPublicKey.dat"
+  RA_ENC_PRIVATE_KEY_FILE: "raEncPrivateKey.dat"
+
+  ECA_CERTS_FOLDER: "/certs/eca"
+  ECA_CERTIFICATE_FILE: "ecaCertificate.coer"
+  ECA_PRIVATE_KEY_FILE: "ecaPrivateKey.dat"
+  ECA_PUBLIC_KEY_FILE: "ecaPublicKey.dat"
+
+  ICA_CERTS_FOLDER: "/certs/ica"
+  ICA_CERTIFICATE_FILE: "icaCertificate.coer"
+
+  ROOTCA_CERTS_FOLDER: "/certs/rootca"
+  ROOTCA_CERTIFICATE_FILE: "rootcaCertificate.coer"
+
+  CTL_FOLDER: "/certs/ctl"
+  CTL_FILE: "ctl.coer"
+  CTL_CCF_FILE: "ccf.coer"
+
+  ROOT_PROTOCOL_FILES_PATH: "/protocol_files"
+
+  # System Parameters
+
+  PARAM_WEBAPI_NAME: "scmsV3"
+  PARAM_WEBAPI_EE_AUTH: "None"
+
+  PARAM_SCMSV3_EE_AUTH: "None"
+  PARAM_SCMSV3_ERROR: "fine"
+  PARAM_SCMSV3_OPTIONS: ""
+
+  PARAM_ECA_MAX_AGE: "1000"
+  PARAM_ECA_MAX_REQS: "100"
+  PARAM_ECA_MAX_WAIT: "100"
+  PARAM_ECA_MIN_WAIT: "0"
+
+  PARAM_RA_ACPC_SUPPORT: "true"
+  PARAM_RA_BUTTERFLY_TYPE: "compact unified"
+  PARAM_RA_MAX_AGE: "0"
+  PARAM_RA_MAX_GEN_DELAY: "4000"
+  PARAM_RA_MAX_REQS: "100"
+  PARAM_RA_MAX_RELOAD_TIME: "0"
+  PARAM_RA_MIN_WAIT: "0"
+
+  PARAM_DOWNLOAD_MAX_AGE: "1000"
+  PARAM_DOWNLOAD_MAX_REQS: "100"
+  PARAM_DOWNLOAD_MIN_WAIT: "0"
+
+  MIN_NUMBER_CERTS_RA: "1"
+  RA_ID: "1"
+
+  RA_PATH: "RA"
+  RA_PROTOCOL_FILES_FOLDER: "protocol_files"
+  RA_RESPONSE_TO_EE_FOLDER: "ra_to_ee_files"
+  RA_RESPONSE_TO_EE_ZIP_FOLDER: "ra_to_ee_files_zip"
+
+  PARAM_SUCCESSOR_NEXT_DL_TIME: "5"
+  PARAM_CERT_NEXT_DL_TIME: "5"
+
+  NUMBER_CERT_BATCHES: "1"
+  TIME_I_PERIOD_EPOCH: "0"
+  TIME_I_PERIOD_INIT: "0"
+
+nameOverride: ""
+fullnameOverride: ""
+podAnnotations: {}
+
+# Shared volume settings
+volume:
+  mysql:
+    path: "/var/lib/mysql"
+    size: 1Gi
+
+ACA:
+  enabled: false
+  database_name: "acadb"
+  external_service:
+    enabled: false
+    nodePort: 30082
+
+DC:
+  enabled: false
+  database_name: "dcdb"
+  external_service:
+    enabled: false
+    nodePort: 30083
+
+CAM:
+  enabled: false
+  database_name: "camdb"
+  external_service:
+    enabled: false
+    nodePort: 30084
+
+ECA:
+  enabled: false
+  database_name: "ecadb"
+  external_service:
+    enabled: false
+    nodePort: 30085
+
+LA:
+  enabled: false
+  image: scmsk8s:latest # Overridden by skaffold with actual image name and tag
+  use_security_strings_and_lhs: true
+
+  external_service:
+    enabled: false
+    nodePortBase: 30090
+
+RA:
+  enabled: false
+  image: scmsk8s:latest # Overridden by skaffold with actual image name and tag
+  database_name: "radb"
+  external_service:
+    enabled: false
+    nodePort: 30080
+  env:
+    MINIMUM_NUMBER_OF_REQUESTS: "1"
+    RA_ID: "1"
+
+mysql:
+  enabled: true
+  resources: {}
+
+  external_service:
+    enabled: false
+    nodePort: 30306
+    type: NodePort
+
+  host: "mysql"
+  port: "3306"
+
+rabbitmq:
+  replicas: 3
+  resources: {}
+  host: "scmsrabbitmq"
+  port: "5672"
+
+devSecrets:
+    mysql:
+      enabled: false
+      username: "!!mysql_username!!"
+      password: "!!mysql_password!!"
+      connection_string_base: "!!mysql://mysql_username:mysql_password@mysql:3306!!"
+
+    rabbitmq:
+      user: "!!rabbitmq_user!!"
+      password: "!!rabbitmq_password"
+
+tools:
+  # PhpMyAdmin
+  pma:
+    enabled: false
+  debug_pod:
+    enabled: false
+
+
+
+

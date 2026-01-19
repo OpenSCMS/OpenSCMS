@@ -1,0 +1,175 @@
+# Copyright (c) 2025 LG Electronics, Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http:#www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# SPDX-License-Identifier: Apache-2.0
+
+{{- $range_end := .Values.env.LA_COUNT | int | add1 }}
+{{- $la_ids := untilStep 1 (int $range_end) 1 }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mysql-startup-scripts
+data:
+  README.txt: |
+    - Any scripts in this ConfigMap are run the first time the container is started
+    - This file acts as a placemarker if all scripts are conditionally removed
+  create-databases.sh: |
+    #!/bin/sh
+    mysql -uroot -p$MYSQL_ROOT_PASSWORD << EOF
+    CREATE DATABASE IF NOT EXISTS {{ .Values.ACA.database_name }};
+    GRANT ALL ON {{ .Values.ACA.database_name }}.* to '$MYSQL_USER';
+    CREATE DATABASE IF NOT EXISTS {{ .Values.CAM.database_name }};
+    GRANT ALL ON {{ .Values.CAM.database_name }}.* to '$MYSQL_USER';
+    CREATE DATABASE IF NOT EXISTS {{ .Values.DC.database_name }};
+    GRANT ALL ON {{ .Values.DC.database_name }}.* to '$MYSQL_USER';
+    CREATE DATABASE IF NOT EXISTS {{ .Values.ECA.database_name }};
+    GRANT ALL ON {{ .Values.ECA.database_name }}.* to '$MYSQL_USER';
+    CREATE DATABASE IF NOT EXISTS {{ .Values.RA.database_name }};
+    GRANT ALL ON {{ .Values.RA.database_name }}.* to '$MYSQL_USER';
+    {{- range $index, $la_id := $la_ids }}
+    CREATE DATABASE IF NOT EXISTS la{{ $la_id }}db;
+    GRANT ALL ON la{{ $la_id }}db.* to '$MYSQL_USER';
+    {{- end }}
+    FLUSH PRIVILEGES;
+    EOF
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: "{{ .Values.mysql.host }}"
+  labels:
+    component: mysql
+spec:
+  selector:
+    component: mysql
+  ports:
+    - name: mysql
+      protocol: TCP
+      port: {{ .Values.mysql.port }}
+      targetPort: 3306
+
+{{ if .Values.mysql.external_service.enabled }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.mysql.host }}-external
+  labels:
+    app.lgscms/is-development: 'yes'
+spec:
+  selector:
+    component: mysql
+  ports:
+    - name: mysql-external
+      protocol: TCP
+      port: {{ .Values.mysql.port }}
+      targetPort: 3306
+      nodePort: {{ .Values.mysql.external_service.nodePort }}
+  type: {{ .Values.mysql.external_service.type }}
+{{ end }}
+
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mysql
+  labels:
+    component: mysql
+    {{- include "lgscms.labels" . | nindent 4 }}
+
+spec:
+  selector:
+    matchLabels:
+      component: mysql
+  serviceName: "{{ .Values.mysql.host }}"
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        component: mysql
+    spec:
+      terminationGracePeriodSeconds: 10
+      {{- with .Values.mysql.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      hostname: mysql
+      containers:
+      - name: mysql
+        image: mysql:8.0.28
+        # The 8.0.22 tag is not immutable, so always pull the latest image.
+        imagePullPolicy: Always
+        resources:
+          {{- toYaml .Values.mysql.resources | nindent 12 }}
+        env:
+          - name: MYSQL_ROOT_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: infra-mysql
+                key: MYSQL_PASSWORD
+          # Do not specify a "default" database for now
+          # - name: MYSQL_DATABASE
+          #   value: ""
+          - name: MYSQL_USER
+            valueFrom:
+              secretKeyRef:
+                name: infra-mysql
+                key: MYSQL_USERNAME
+          - name: MYSQL_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: infra-mysql
+                key: MYSQL_PASSWORD
+        volumeMounts:
+        - name: db
+          mountPath: "{{ .Values.volume.mysql.path }}"
+        - name: mysql-startup-scripts
+          mountPath: /docker-entrypoint-initdb.d/
+        readinessProbe:
+          exec:
+            command:
+            - bash
+            - "-c"
+            - |
+              mysql -h127.0.0.1 -uroot -p$MYSQL_ROOT_PASSWORD -e'SELECT 1';
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 5
+        livenessProbe:
+          exec:
+            command:
+            - bash
+            - "-c"
+            - |
+              mysqladmin -uroot -p$MYSQL_ROOT_PASSWORD ping;
+          initialDelaySeconds: 300
+          periodSeconds: 10
+          timeoutSeconds: 5
+
+      volumes:
+      - name: mysql-startup-scripts
+        configMap:
+          name: mysql-startup-scripts
+
+  volumeClaimTemplates:
+  - metadata:
+      name: db
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: standard
+      resources:
+        requests:
+          storage: "{{ .Values.volume.mysql.size }}"

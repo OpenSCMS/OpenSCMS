@@ -1,0 +1,8 @@
+/target
+/scratch-pad
+/protocol_files
+logs
+*.docx#
+/certs
+/external_service_files
+.vscode
