@@ -68,7 +68,7 @@ kind: Service
 metadata:
   name: {{ .Values.mysql.host }}-external
   labels:
-    app.lgscms/is-development: 'yes'
+    app.openscms/is-development: 'yes'
 spec:
   selector:
     component: mysql
@@ -88,7 +88,7 @@ metadata:
   name: mysql
   labels:
     component: mysql
-    {{- include "lgscms.labels" . | nindent 4 }}
+    {{- include "openscms.labels" . | nindent 4 }}
 
 spec:
   selector:

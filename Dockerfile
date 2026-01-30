@@ -41,7 +41,7 @@ COPY --chown=scmsuser ./certs /certs
 ENV OSCMS_INSTALL_TARGET_DIR=/home/app/oscms_install
 ENV LD_LIBRARY_PATH=$OSCMS_INSTALL_TARGET_DIR/lib:$LD_LIBRARY_PATH
 
-COPY --chown=scmsuser --exclude=lgasn/lib1609 --exclude=./certs . .
+COPY --chown=scmsuser --exclude=./certs . .
 RUN cargo fetch --locked
 RUN cargo build --frozen
 

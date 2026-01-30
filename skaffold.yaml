@@ -37,7 +37,7 @@ build:
 manifests:
   helm:
     releases:
-      - name: lgscms
+      - name: openscms
         chartPath: deployment
         valuesFiles:
           - deployment/values-local.yaml

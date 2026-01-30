@@ -15,7 +15,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 apiVersion: v2
-name: lgscms
+name: openscms
 description: >
     LG Implementation of an IEE1609.2.1 compliant SCMS
 type: application

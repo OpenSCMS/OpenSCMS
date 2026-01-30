@@ -1,4 +1,28 @@
-# Setting up your Enviroment for working with minikube
+<!--
+Copyright (c) 2025 LG Electronics, Inc.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+SPDX-License-Identifier: Apache-2.0
+-->
+
+<!-- omit from toc -->
+# Setting up your environment for working with minikube
+
+- [Install the tools](#install-the-tools)
+- [Configure minikube](#configure-minikube)
+- [Start up minikube and check configuration](#start-up-minikube-and-check-configuration)
+- [Setup a hostname for accessing minikube](#setup-a-hostname-for-accessing-minikube)
 
 ## Install the tools
 
@@ -15,13 +39,13 @@ echo 'source <(binenv completion bash)'
 exec $SHELL
 ```
 
-Next install the tools we use. Ther versions can be seen in `.binenv.lock` in the repository root.
+Next install the tools we use. Their versions can be seen in `.binenv.lock` in the repository root.
 
-` shell
-`binenv install -l`
-`
+``` shell
+binenv install -l
+```
 
-From this point, anytime you enter the directory these tools will be in your path at the selected versions.
+From this point, any time you enter the directory these tools will be in your path at the selected versions.
 
 ## Configure minikube
 
@@ -35,6 +59,7 @@ We use the docker driver for `minikube`, and this should be configured permanent
 
 Now install the `krew` plugin manager for `kubectl`
 
+<!--- cSpell:disable --->
 ``` shell
 (
   set -x; cd "$(mktemp -d)" &&
@@ -48,6 +73,7 @@ Now install the `krew` plugin manager for `kubectl`
 echo 'export PATH="$HOME/.krew/bin:$PATH"' >> $HOME/.bashrc
 exec $SHELL
 ```
+<!--- cSpell:enable --->
 
 Test the installation with the command
 
@@ -65,19 +91,20 @@ kubectl krew install rabbitmq
 
 To start minikube, enter the command:
 
-```
+```shell
 minikube start
 ```
 
-This will take while the first time as it downloads some large images. Once it completes, do a test deployment of the SCMS.
+This will take a while the first time as it downloads some large images. Once it completes, do a test deployment of the SCMS.
 
-From the reporsitory root enter the following, whcih will deploy the app and then close it down again:
+From the repository root enter the following, which will deploy the app and then close it down again:
 
 ```shell
+scripts/run_test_scms_manager.sh # to generate the certificates
 skaffold run && skaffold delete
 ```
 
-When this completes, we can check that the `RabbitMQ` extensions were installed during deplyment with the following:
+Once this completes, we can check that the `RabbitMQ` extensions were installed during deployment with the following:
 
 ```shell
 kubectl get ns
@@ -93,24 +120,3 @@ Which should list a namespace called `rabbitmq-system`.
 sudo echo "$(minikube ip) minikube" >>/etc/hosts
 ping minikube
 ```
-
-## Copyright and License Information
-
-Unless otherwise specified, all content, including all source code files and
-documentation files in this repository are:
-
-Copyright (c) 2025 LG Electronics, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-<http://www.apache.org/licenses/LICENSE-2.0>
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-SPDX-License-Identifier: Apache-2.0
