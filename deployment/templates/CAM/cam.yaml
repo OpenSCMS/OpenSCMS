@@ -22,9 +22,9 @@ kind: Deployment
 metadata:
   name: cam-deployment
   labels:
-    project: {{ include "lgscms.fullname" $ }}
+    project: {{ include "openscms.fullname" $ }}
     component: "cam"
-    {{- include "lgscms.labels" $ | nindent 4 }}
+    {{- include "openscms.labels" $ | nindent 4 }}
 
 spec:
   replicas: 1
@@ -34,7 +34,7 @@ spec:
   template:
     metadata:
       labels:
-        project: {{ include "lgscms.fullname" $ }}
+        project: {{ include "openscms.fullname" $ }}
         component: "cam"
     spec:
       hostname: "cam"
@@ -68,7 +68,7 @@ kind: Service
 metadata:
   name: cam
   labels:
-    project: {{ include "lgscms.fullname" $ }}
+    project: {{ include "openscms.fullname" $ }}
     component: "cam"
 
 spec:
@@ -88,7 +88,7 @@ kind: Service
 metadata:
   name: cam-external-service
   labels:
-    app.lgscms/is-development: 'yes'
+    app.openscms/is-development: 'yes'
     component: cam
 spec:
   type: LoadBalancer

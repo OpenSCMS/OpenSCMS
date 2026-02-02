@@ -20,9 +20,9 @@ kind: Deployment
 metadata:
   name: pma
   labels:
-    project: {{ include "lgscms.fullname" . }}
+    project: {{ include "openscms.fullname" . }}
     component: pma
-    {{- include "lgscms.labels" . | nindent 4 }}
+    {{- include "openscms.labels" . | nindent 4 }}
 
 spec:
   replicas:  1
@@ -32,7 +32,7 @@ spec:
   template:
     metadata:
       labels:
-        project: {{ include "lgscms.fullname" . }}
+        project: {{ include "openscms.fullname" . }}
         component: pma
     spec:
       containers:

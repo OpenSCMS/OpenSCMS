@@ -26,9 +26,9 @@ kind: Deployment
 metadata:
   name: "{{ $la_id }}-deployment"
   labels:
-    project: {{ include "lgscms.fullname" $ }}
+    project: {{ include "openscms.fullname" $ }}
     component: "{{ $la_id }}"
-    {{- include "lgscms.labels" $ | nindent 4 }}
+    {{- include "openscms.labels" $ | nindent 4 }}
 
 spec:
   replicas: 1
@@ -38,7 +38,7 @@ spec:
   template:
     metadata:
       labels:
-        project: {{ include "lgscms.fullname" $ }}
+        project: {{ include "openscms.fullname" $ }}
         component: "{{ $la_id }}"
     spec:
       hostname: "{{ $la_id }}"
@@ -76,7 +76,7 @@ kind: Service
 metadata:
   name: "{{ $la_id }}"
   labels:
-    project: {{ include "lgscms.fullname" $ }}
+    project: {{ include "openscms.fullname" $ }}
     component: "{{ $la_id }}"
 
 spec:
@@ -95,7 +95,7 @@ kind: Service
 metadata:
   name: "{{ $la_id }}-external-service"
   labels:
-    app.lgscms/is-development: 'yes'
+    app.openscms/is-development: 'yes'
     component: "{{ $la_id }}"
 spec:
   type: LoadBalancer

@@ -22,9 +22,9 @@ kind: Deployment
 metadata:
   name: aca-deployment
   labels:
-    project: {{ include "lgscms.fullname" $ }}
+    project: {{ include "openscms.fullname" $ }}
     component: "aca"
-    {{- include "lgscms.labels" $ | nindent 4 }}
+    {{- include "openscms.labels" $ | nindent 4 }}
 
 spec:
   replicas: 1
@@ -34,7 +34,7 @@ spec:
   template:
     metadata:
       labels:
-        project: {{ include "lgscms.fullname" $ }}
+        project: {{ include "openscms.fullname" $ }}
         component: "aca"
     spec:
       hostname: "aca"
@@ -68,7 +68,7 @@ kind: Service
 metadata:
   name: aca
   labels:
-    project: {{ include "lgscms.fullname" $ }}
+    project: {{ include "openscms.fullname" $ }}
     component: "aca"
 
 spec:
@@ -88,7 +88,7 @@ kind: Service
 metadata:
   name: aca-external-service
   labels:
-    app.lgscms/is-development: 'yes'
+    app.openscms/is-development: 'yes'
     component: aca
 spec:
   type: LoadBalancer
