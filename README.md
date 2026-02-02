@@ -35,6 +35,8 @@ For a full description of the OpenSCMS project see the [main README](<https://gi
   - [Setting up Minikube for Testing](#setting-up-minikube-for-testing)
   - [Using Docker for Development](#using-docker-for-development)
   - [Getting the Code](#getting-the-code)
+- [Running the Server In Minikube](#running-the-server-in-minikube)
+- [Exploring the Server](#exploring-the-server)
 - [Contributing](#contributing)
 - [License](#license)
 
@@ -135,6 +137,106 @@ The list of repositories, and their relative submodule dependencies is as follow
       - [oscms-asn1c-generated](<https://github.com/OpenSCMS/oscms-asn1c-generated>)
         - [etsi_ts103097-asn](<https://github.com/OpenSCMS/etsi_ts103097-asn>)
         - [ieee1609dot2dot1-asn](<https://github.com/OpenSCMS/ieee1609dot2dot1-asn>)
+
+## Running the Server In Minikube
+
+OpenSCMS was developed and tested using `minikube`. Once you have performed the needed [MINIKUBE Setup](./MINIKUBE_SETUP.md), you can start the local server
+with the simple command
+
+``` shell
+skaffold run
+```
+
+This will first build a docker image which is used for each microservice. If this step fails with the following cryptic message about checking the cache
+
+<!--- cSpell:disable --->
+``` bash
+$ skaffold run
+Generating tags...
+ - rustscms -> rustscms:09371a4
+Checking cache...
+ - rustscms: Error checking cache.
+getting hash for artifact "rustscms": getting dependencies for "rustscms": file pattern [./certs] must match at least one file
+```
+<!--- cSpell:enable --->
+
+This means you have not run the script to generate the required certificates (and maybe didn't follow all the MINIKUBE set up instructions). Do so now by running the following
+
+``` shell
+scripts/run_test_scms_manager.sh
+```
+
+and then issue the `skaffold run` command again.
+
+Once the command completes, and all deployments are ready, you can check the running system with the following command
+
+<!--- cSpell:disable --->
+```shell
+$ kubectl get pods
+NAME                              READY   STATUS    RESTARTS   AGE
+aca-deployment-c7784bf4d-tm6jc    1/1     Running   0          14m
+cam-deployment-5fb86f586d-v9khb   1/1     Running   0          14m
+debugpod-787685b56d-49gdx         1/1     Running   0          14m
+eca-deployment-949f95b4-gpdr4     1/1     Running   0          14m
+la1-deployment-78468658dd-q5lxh   1/1     Running   0          14m
+la2-deployment-85d965b74f-w5ck8   1/1     Running   0          14m
+mysql-0                           1/1     Running   0          14m
+pma-7487f78bdb-th4v5              1/1     Running   0          14m
+ra-deployment-7865966b6b-dztlt    1/1     Running   0          14m
+ra-worker-74fdbcb568-h79ht        1/1     Running   0          14m
+scmsrabbitmq-server-0             1/1     Running   0          14m
+```
+<!--- cSpell:enable --->
+
+## Exploring the Server
+
+As deployed, OpenSCMS exposes a number of endpoints to enable access from your host and web browser. You can see these with the command `minikube service list` which should produce something like the following
+
+<!--- cSpell:disable --->
+```shell
+$ minikube service list
+┌─────────────┬──────────────────────┬───────────────────────────┬───────────────────────────┐
+│  NAMESPACE  │         NAME         │        TARGET PORT        │            URL            │
+├─────────────┼──────────────────────┼───────────────────────────┼───────────────────────────┤
+│ default     │ aca                  │ No node port              │                           │
+│ default     │ aca-external-service │ aca-external-service/5000 │ http://192.168.49.2:30082 │
+│ default     │ cam                  │ No node port              │                           │
+│ default     │ cam-external-service │ cam-external-service/5000 │ http://192.168.49.2:30084 │
+│ default     │ eca                  │ No node port              │                           │
+│ default     │ eca-external-service │ eca-external-service/5000 │ http://192.168.49.2:30085 │
+│ default     │ kubernetes           │ No node port              │                           │
+│ default     │ la1                  │ No node port              │                           │
+│ default     │ la1-external-service │ la1-external-service/5000 │ http://192.168.49.2:30091 │
+│ default     │ la2                  │ No node port              │                           │
+│ default     │ la2-external-service │ la2-external-service/5000 │ http://192.168.49.2:30092 │
+│ default     │ mysql                │ No node port              │                           │
+│ default     │ mysql-external       │ mysql-external/3306       │ http://192.168.49.2:30306 │
+│ default     │ pma                  │ 80                        │ http://192.168.49.2:30081 │
+│ default     │ ra                   │ No node port              │                           │
+│ default     │ ra-external-service  │ ra-external-service/5000  │ http://192.168.49.2:30080 │
+│ default     │ scmsrabbitmq         │ No node port              │                           │
+│ default     │ scmsrabbitmq-nodes   │ No node port              │                           │
+│ kube-system │ kube-dns             │ No node port              │                           │
+└─────────────┴──────────────────────┴───────────────────────────┴───────────────────────────┘
+```
+<!--- cSpell:enable --->
+
+In addition to the endpoints for the various microservices, such as RA, you can gain external access to:
+
+- the `mysql` server on port 30306.
+- a useful graphical interface to the database via the `pma` service. Just open the provided URL in your browser.
+- the OpenAPI JSON definition for all endpoints at `<Service URL>/api-docs/openapi.json` where `<Service URL>` is the exposed URL for the service you are interested in.
+- a `Postman` style Swagger-UI API explorer at `<Service URL>/swagger-ui/` (Note the trailing `/`) for each service.
+
+Finally, for really low level poking around or when things won't start up, you will notice a "debug pod" in the output of `kubectl get pods` (`debugpod-787685b56d-49gdx` in the output above). This pod is running a `busybox` image and you can effectively SSH into it with the following command
+
+<!--- cSpell:disable --->
+``` shell
+ kubectl exec --stdin --tty debugpod-787685b56d-49gdx -- /bin/sh
+```
+<!--- cSpell:enable --->
+
+Obviously, you will want to disable most of these tools in a production deployment.
 
 ## Contributing
 
