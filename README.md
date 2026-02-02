@@ -46,7 +46,7 @@ We assume a debian-based development environment, ideally Ubuntu 24.04 or newer.
 
 ### Getting the Code
 
-The Open SCMS stack makes heavy use of submodules. Therefore, the clone command should ensure it pulls down all sub modules as follows.
+The OpenSCMS stack makes heavy use of submodules. Therefore, the clone command should ensure it pulls down all sub modules as follows.
 
 ```bash
 git clone --recurse-submodules git@github.com:OpenSCMS/OpenSCMS.git

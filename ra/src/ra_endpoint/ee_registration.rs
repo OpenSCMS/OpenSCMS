@@ -32,6 +32,7 @@ use sha2::{Digest, Sha256};
 // EE registration path dcms/device/na
 #[utoipa::path(
     post,
+    tag = "Device Configuration",
     path = "/dcms/device/na",
     request_body(
       content = PayloadEeRegistration,
@@ -172,6 +173,7 @@ pub struct CanonicalIdParam {
 
 #[utoipa::path(
   get,
+  tag = "Device Configuration",
   path = "/dcms/device/na",
   params(
     (
@@ -274,6 +276,7 @@ pub async fn handle_get_ee(
 
 #[utoipa::path(
     patch,
+    tag = "Device Configuration",
     path = "/dcms/device/na",
     request_body(
         content = PayloadEePatchStatus,
@@ -362,6 +365,7 @@ pub async fn handle_patch_ee(
 // Download ee policy /dcms/policy/na?canonicalId=<canonicalID> para ee policy file
 #[utoipa::path(
     get,
+    tag = "Device Configuration",
     path = "/dcms/policy/na",
     params(
         (
