@@ -54,12 +54,12 @@ pub fn make_certificate_mgmt_info_status_file_encoded(
         ));
     }
 
-    let mut squence_of_ma_psid_list_sizes: Vec<usize> = ma_psid_list
+    let mut sequence_of_ma_psid_list_sizes: Vec<usize> = ma_psid_list
         .iter()
         .map(|psid_list| psid_list.len())
         .collect();
 
-    let mut squence_of_ma_psid_list: Vec<*mut u64> = ma_psid_list
+    let mut sequence_of_ma_psid_list: Vec<*mut u64> = ma_psid_list
         .iter()
         .map(|v| v.as_ptr() as *mut u64)
         .collect();
@@ -76,7 +76,7 @@ pub fn make_certificate_mgmt_info_status_file_encoded(
         ));
     }
 
-    let mut squence_of_ctl_series_id_list: Vec<*mut u8> = ctl_series_id_list
+    let mut sequence_of_ctl_series_id_list: Vec<*mut u8> = ctl_series_id_list
         .iter()
         .map(|v| v.as_ptr() as *mut u8)
         .collect();
@@ -96,7 +96,7 @@ pub fn make_certificate_mgmt_info_status_file_encoded(
         ));
     }
 
-    let mut squence_of_crl_craca_id_list: Vec<*mut u8> = crl_craca_id_list
+    let mut sequence_of_crl_craca_id_list: Vec<*mut u8> = crl_craca_id_list
         .iter()
         .map(|v| v.as_ptr() as *mut u8)
         .collect();
@@ -143,15 +143,15 @@ pub fn make_certificate_mgmt_info_status_file_encoded(
     }
 
     let mut args = CertificateManagementInformationStatusSpduArgs {
-        sequence_of_ma_psid_list: squence_of_ma_psid_list.as_mut_ptr(),
-        sequence_of_ma_psid_list_sizes: squence_of_ma_psid_list_sizes.as_mut_ptr(),
+        sequence_of_ma_psid_list: sequence_of_ma_psid_list.as_mut_ptr(),
+        sequence_of_ma_psid_list_sizes: sequence_of_ma_psid_list_sizes.as_mut_ptr(),
         sequence_of_ma_updated_time: ma_updated_time_list.as_mut_ptr(),
         sequence_of_ma_size: ma_psid_list.len(),
         sequence_of_ctl_sequence_number: ctl_sequence_number_list.as_mut_ptr(),
-        sequence_of_ctl_series_id: squence_of_ctl_series_id_list.as_mut_ptr(),
+        sequence_of_ctl_series_id: sequence_of_ctl_series_id_list.as_mut_ptr(),
         sequence_of_ctl_last_update: ctl_updated_time_list.as_mut_ptr(),
         sequence_of_ctl_size: ctl_sequence_number_list.len(),
-        sequence_of_crl_craca_id: squence_of_crl_craca_id_list.as_mut_ptr(),
+        sequence_of_crl_craca_id: sequence_of_crl_craca_id_list.as_mut_ptr(),
         sequence_of_crl_series: crl_series_id_list.as_mut_ptr(),
         sequence_of_crl_issue_date: crl_issue_date_list.as_mut_ptr(),
         sequence_of_crl_size: crl_craca_id_list.len(),
@@ -199,17 +199,18 @@ pub fn make_certificate_mgmt_info_status_file_encoded(
         // The last update date is expressed as a Coordinated
         // Universal Time (UTC) time in ISO 8601-1 format with hours, minutes, and seconds given as follows: YYYYMM-
         // DDTHH:MM:SSZ.
-        let formated_last_update_date = chrono::DateTime::from_timestamp(ra_updated_time as i64, 0);
-        if formated_last_update_date.is_none() {
+        let formatted_last_update_date =
+            chrono::DateTime::from_timestamp(ra_updated_time as i64, 0);
+        if formatted_last_update_date.is_none() {
             return Err(OscmsBridgeError::new(
                 OscmsErrorCode_OSCMS_ERROR_INTERNAL_SERVER_ERROR,
             ));
         }
-        let formated_last_update_date = formated_last_update_date.unwrap();
-        let formated_last_update_date = formated_last_update_date.format("%Y%m%dT%H:%M:%SZ");
+        let formatted_last_update_date = formatted_last_update_date.unwrap();
+        let formatted_last_update_date = formatted_last_update_date.format("%Y%m%dT%H:%M:%SZ");
         let filename = format!(
             "scms-management-infostatus_{}_{}.oer",
-            ra_hostname, formated_last_update_date
+            ra_hostname, formatted_last_update_date
         );
 
         log::debug!(

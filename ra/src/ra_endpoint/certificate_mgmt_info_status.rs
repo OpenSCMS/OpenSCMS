@@ -15,7 +15,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use crate::persistence::ccf_store::get_latest_updated_time;
-use crate::persistence::crl_store::fech_all_crls_models;
+use crate::persistence::crl_store::fetch_all_crls_models;
 use crate::persistence::ctl_store::fetch_all_ctl_series_ids_sequence_number_and_updated_time;
 use crate::persistence::ra_certificates::{
     get_ra_certificates_latest_updated_time, latest_ra_certificate, latest_ra_private_key,
@@ -85,16 +85,16 @@ pub async fn certificate_management_info_status_download(
 async fn handle_certificate_management_info_status_download(
     db: &DatabaseConnection,
 ) -> Result<(Vec<u8>, String), errors::HandleResponseError> {
-    log::debug!("Handling GET request for Certificate Management Info Status donwload");
+    log::debug!("Handling GET request for Certificate Management Info Status download");
 
     // Loading conf
     let config_info = GlobalConfigInfo::from_global_config_or_default();
 
-    // TODO: We dont have the MA component yet, so MA info will be empty
+    // TODO: We don't have the MA component yet, so MA info will be empty
     let ma_psid_list = vec![];
     let ma_update_time_list = vec![];
 
-    let crl_info = fech_all_crls_models(db).await?;
+    let crl_info = fetch_all_crls_models(db).await?;
     // craca Id as Vec<u8>, So we need to turn hex string into Vec<u8>
     let crl_craca_id_list = crl_info
         .iter()

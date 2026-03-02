@@ -352,7 +352,7 @@ pub fn decode_certificate_request_spdu(
     empty_args(&mut args);
 
     // 5. Return Caterpillar if everything went well
-    // Return caterpillar when butterfly and non buterffly otherwise
+    // Return caterpillar when butterfly and non butterfly otherwise
     log::debug!("Payload decoded successfully");
     Ok((
         caterpillar,

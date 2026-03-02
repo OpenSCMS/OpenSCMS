@@ -24,20 +24,20 @@ use crate::util::{
 
 use scmscommon::GlobalConfig;
 
-pub fn ra_sucessor_enrollment_certificate_request_handler(
-    sucessor_enrollment_request: Vec<u8>,
+pub fn ra_successor_enrollment_certificate_request_handler(
+    successor_enrollment_request: Vec<u8>,
     ra_private: Vec<u8>,
     ra_enc_private: Vec<u8>,
     ra_certificate: Vec<u8>,
 ) -> Result<(Vec<u8>, Vec<u8>, String), OscmsBridgeError> {
     log::debug!(
-        "OSCMS-BRIDGE: Starting ra_sucessor_enrollment_certificate_request_handler processing, request len: {:?}",
-        sucessor_enrollment_request.len()
+        "OSCMS-BRIDGE: Starting ra_successor_enrollment_certificate_request_handler processing, request len: {:?}",
+        successor_enrollment_request.len()
     );
 
     // Inputs
     let encoded_ee_ra_successor_enrollment_request =
-        initialize_oscms_new_octet_buffer_from_vec(sucessor_enrollment_request.clone());
+        initialize_oscms_new_octet_buffer_from_vec(successor_enrollment_request.clone());
     let ra_private_key = initialize_oscms_new_octet_buffer_from_vec(ra_private.clone());
     let ra_enc_private_key = initialize_oscms_new_octet_buffer_from_vec(ra_enc_private.clone());
     let ra_encoded_certificate = initialize_oscms_new_octet_buffer_from_vec(ra_certificate.clone());
@@ -123,11 +123,11 @@ mod tests {
     }
 
     #[test]
-    fn test_ra_sucessor_enrollment_certificate_request_handler() {
+    fn test_ra_successor_enrollment_certificate_request_handler() {
         // Getting global config object
         setup_global_config();
 
-        let sucessor_enrollment_certificate_request = vec![
+        let successor_enrollment_certificate_request = vec![
             0x03, 0x82, 0x01, 0x01, 0x82, 0xd8, 0x63, 0xe1, 0x18, 0xf8, 0xa4, 0xaf, 0xb7, 0x80,
             0x82, 0x0b, 0xec, 0x09, 0x7c, 0x5e, 0xcb, 0x43, 0xd0, 0xe8, 0xfd, 0x55, 0xd7, 0x50,
             0x80, 0x01, 0x78, 0x20, 0xb7, 0xaf, 0xe0, 0x63, 0x30, 0x02, 0x58, 0xfe, 0x2f, 0x69,
@@ -166,8 +166,8 @@ mod tests {
 
         let ra_enc_private_key = ra_enc_private_key();
 
-        match ra_sucessor_enrollment_certificate_request_handler(
-            sucessor_enrollment_certificate_request,
+        match ra_successor_enrollment_certificate_request_handler(
+            successor_enrollment_certificate_request,
             C_RA_PRIVATE_KEY.to_vec(),
             ra_enc_private_key,
             ra_cert_test(),

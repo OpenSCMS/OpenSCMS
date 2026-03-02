@@ -160,7 +160,7 @@ mod tests {
         let craca_id = [0x01, 0x02, 0x03];
         let crl_series = 0;
 
-        let privave_key_info: Option<Vec<u8>> = Some(vec![0; 32]);
+        let private_key_info: Option<Vec<u8>> = Some(vec![0; 32]);
         let certificate_type = CertificateType::Explicit;
 
         match issue_authorization_certificate(
@@ -168,7 +168,7 @@ mod tests {
             aca_certificate,
             param_S,
             param_E,
-            privave_key_info,
+            private_key_info,
             scms_type,
             certificate_validity_start,
             certificate_validity_duration,

@@ -79,7 +79,7 @@ async fn check_outside_ra_max_reqs(
     Ok(next_period_request_count)
 }
 
-pub async fn check_ra_incomming_request_frequency_by_vid(
+pub async fn check_ra_incoming_request_frequency_by_vid(
     app_ip: String,
     vid: u64,
     request_time: u32,
@@ -124,7 +124,7 @@ pub async fn check_ra_incomming_request_frequency_by_vid(
     Ok(())
 }
 
-pub async fn check_ra_incomming_request_frequency_by_app_ip(
+pub async fn check_ra_incoming_request_frequency_by_app_ip(
     app_ip: String,
     request_time: u32,
     request_type: RaRequestManagementRequestType,

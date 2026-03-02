@@ -33,7 +33,7 @@ pub enum Ieee1609Dot2Dot1ErrorCodes {
 // If scmsV3-error = fine and the RA or ECA returns 400 or 403, the proprietary Ieee-1609.2.1-Error
 // header indicates the issue. The value from Ieee-1609.2.1-Error will be 400-xxx or 403-xxx
 // where xxx is the error code defined in the standard's "Table 8 - Error codes"
-// and follwing values are possible:
+// and following values are possible:
 // For 400-xxx:
 #[derive(Debug, Display, Eq, PartialEq, Clone, Copy, FromPrimitive)]
 pub enum BadRequestErrorCodes {

@@ -426,7 +426,7 @@ pub struct CcfCtlQueryParams {
   responses(
     (
       status = 200,
-      body = [u8], description = "File containing a CertficiateChainSpdu",
+      body = [u8], description = "File containing a CertificateChainSpdu",
       headers(("Content-Disposition", description = "attachment filename"))
     ),
     (

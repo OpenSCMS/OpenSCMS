@@ -29,8 +29,8 @@ use crate::util::{
 use byteorder::{ByteOrder, LittleEndian};
 use scmscommon::GlobalConfig;
 
-pub fn eca_sucessor_enrollment_certificate_request_handler(
-    sucessor_enrollment_request: Vec<u8>,
+pub fn eca_successor_enrollment_certificate_request_handler(
+    successor_enrollment_request: Vec<u8>,
     request_hash_id: String,
     eca_private_key: Vec<u8>,
     eca_public_uncompressed: Vec<u8>,
@@ -38,8 +38,8 @@ pub fn eca_sucessor_enrollment_certificate_request_handler(
     time_request_received: u32,
 ) -> Result<(String, Vec<u8>, (u64, String)), OscmsBridgeError> {
     log::debug!(
-        "OSCMS-BRIDGE: Start ecaSucessorRequestHandler processing: {:?}",
-        sucessor_enrollment_request.len()
+        "OSCMS-BRIDGE: Start ecaSuccessorRequestHandler processing: {:?}",
+        successor_enrollment_request.len()
     );
 
     let mut params = EeEcaCertRequestCheckParams {
@@ -50,7 +50,7 @@ pub fn eca_sucessor_enrollment_certificate_request_handler(
 
     // Inputs
     let encoded_successor_enrollment_request =
-        initialize_oscms_new_octet_buffer_from_vec(sucessor_enrollment_request.clone());
+        initialize_oscms_new_octet_buffer_from_vec(successor_enrollment_request.clone());
     let issuer_public_key =
         initialize_oscms_new_octet_buffer_from_vec(eca_public_uncompressed.to_vec());
     let issuer_private_key = initialize_oscms_new_octet_buffer_from_vec(eca_private_key.clone());
@@ -169,7 +169,7 @@ pub fn eca_sucessor_enrollment_certificate_request_handler(
     }
 
     log::debug!(
-        "Finish ecaSucessorRequestHandler processing: filename {}, content len {}",
+        "Finish ecaSuccessorRequestHandler processing: filename {}, content len {}",
         filename,
         output_successor_enrollment_certificate.len()
     );
@@ -219,8 +219,8 @@ mod tests {
     }
 
     #[test]
-    fn test_eca_sucessor_enrollment_certificate_request_handler() {
-        let decoded_sucessor_enrollment_certificate_request = vec![
+    fn test_eca_successor_enrollment_certificate_request_handler() {
+        let decoded_successor_enrollment_certificate_request = vec![
             0x03, 0x83, 0x82, 0x01, 0x63, 0x00, 0x02, 0x87, 0x84, 0x03, 0x83, 0x81, 0xc9, 0x00,
             0x02, 0x85, 0x80, 0x40, 0x02, 0x27, 0x2c, 0x63, 0x0a, 0x01, 0x06, 0x83, 0xb7, 0xb9,
             0x02, 0x00, 0x04, 0x27, 0x2c, 0x63, 0x0a, 0x86, 0x00, 0x06, 0x01, 0x01, 0xe0, 0x81,
@@ -255,8 +255,8 @@ mod tests {
         let time_request_received = 657220362;
         let request_hash_id = "7062e221b21f4fdd".to_string();
 
-        match eca_sucessor_enrollment_certificate_request_handler(
-            decoded_sucessor_enrollment_certificate_request,
+        match eca_successor_enrollment_certificate_request_handler(
+            decoded_successor_enrollment_certificate_request,
             request_hash_id,
             C_ECA_PRIVATE.to_vec(),
             C_ECA_PUBLIC_UNCOMPRESSED.to_vec(),

@@ -85,7 +85,7 @@ async fn encrypt_plvs(
 }
 
 /// In the ACA we should have a function called decrypt_plv.
-/// The it sends the PLV (descrypted) to the ACA-C library.
+/// The it sends the PLV (decrypted) to the ACA-C library.
 async fn encrypt_plv(plv: Plv, db: &DatabaseConnection) -> Result<Eplv, EncryptPlvError> {
     let aca_pub_key_uncompressed: Vec<u8> = latest_aca_public_key(db).await.map_err(|e| {
         EncryptPlvError::new(&format!(
@@ -235,7 +235,7 @@ mod tests {
         let (shared_secret, _ephemeral_pub_key) = gen_shared_secret(&public_key).unwrap();
         let plv = Plv::new([11; 16], 42, 99);
 
-        // apply encyption
+        // apply encryption
         let (_eplv_value, _nonce) = encrypt_plv_value(shared_secret.clone(), plv.value);
     }
 }

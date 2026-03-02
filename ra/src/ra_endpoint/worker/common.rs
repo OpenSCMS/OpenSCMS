@@ -92,7 +92,7 @@ mod tests {
             error: "".to_string(),
         };
 
-        // Mock ther server
+        // Mock the server
         let mut server = mockito::Server::new_async().await;
         let _m = server
             .mock("POST", "/v3/authorization-certificate")
@@ -117,7 +117,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_post_ra_to_component_timeout() {
-        // Mock ther server
+        // Mock the server
         let mut server = mockito::Server::new_async().await;
         let _m = server
             .mock("POST", "/v3/authorization-certificate")

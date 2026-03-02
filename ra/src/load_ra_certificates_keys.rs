@@ -17,7 +17,6 @@
 use futures::TryFutureExt;
 use sea_orm::DatabaseConnection;
 
-// use liblgasn::encode_certificate;
 use scmscommon::{
     GlobalConfig, PersistenceLoadError,
     load_certificates_keys::{LoadMaterialType, read_certificate_or_key_file},
