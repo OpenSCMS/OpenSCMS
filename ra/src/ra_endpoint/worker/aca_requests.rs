@@ -50,12 +50,12 @@ pub async fn handle_aca_request(
 
     if exp_type != ExpansionType::NonButterfly && exp_type != ExpansionType::NonButterflyEncrypted {
         // Unshuffling certificates from ACA based on mapping stored before ACA request
-        log::debug!("Unshuffling certificares from ACA");
+        log::debug!("Unshuffling certificates from ACA");
         unshuffle_and_store_certificates(requests_mapping.clone(), certificates, db).await?;
 
         // Generate and store x.info files
         log::debug!("Generating and storing x.info files");
-        genenerate_and_store_x_dot_info(requests_mapping, db).await?;
+        generate_and_store_x_dot_info(requests_mapping, db).await?;
     } else if non_butterfly_request.is_some() {
         log::debug!("Storing certificate for NonButterflyRequest");
 
@@ -258,7 +258,7 @@ async fn unshuffle_and_store_certificates(
 // RaEeCertInfoSpdu if the file does not contain ACPC information, and a C-OER
 // encoded RaEeCertAndAcpcInfoSpdu if the file contains ACPC information
 // (specifically, an AcpcTreeId)."
-async fn genenerate_and_store_x_dot_info(
+async fn generate_and_store_x_dot_info(
     requests_mapping: Vec<ClientRequestsMapping>,
     db: &DatabaseConnection,
 ) -> Result<(), errors::ScmsInternalCommError> {
@@ -523,7 +523,7 @@ mod tests {
 
         let db = mock_db();
         test_unshuffle_and_store_certificates(&db).await;
-        test_genenerate_and_store_x_dot_info(&db).await;
+        test_generate_and_store_x_dot_info(&db).await;
         test_handle_aca_request().await;
     }
 
@@ -627,7 +627,7 @@ mod tests {
         assert!(result.is_ok());
     }
 
-    async fn test_genenerate_and_store_x_dot_info(db: &DatabaseConnection) {
+    async fn test_generate_and_store_x_dot_info(db: &DatabaseConnection) {
         let client_mapping: Vec<ClientRequestsMapping> = vec![
             ClientRequestsMapping {
                 vid: 1,
@@ -679,10 +679,10 @@ mod tests {
             },
         ];
 
-        let result = genenerate_and_store_x_dot_info(client_mapping.clone(), db)
+        let result = generate_and_store_x_dot_info(client_mapping.clone(), db)
             .await
             .map_err(|e| {
-                panic!("Failed genenerate_and_store_x_dot_info: {:#?}", e);
+                panic!("Failed generate_and_store_x_dot_info: {:#?}", e);
             });
         assert!(result.is_ok());
     }

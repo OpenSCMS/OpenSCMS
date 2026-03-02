@@ -62,7 +62,7 @@ pub async fn download_eca_public_key() -> Result<Vec<u8>, errors::ScmsInternalCo
 }
 
 pub async fn handle_eca_enrollment_certificate_request(
-    successor_erollment_request: Vec<u8>,
+    successor_enrollment_request: Vec<u8>,
     hash_id: String,
 ) -> Result<(String, Vec<u8>), errors::ScmsInternalCommError> {
     // Construct request address
@@ -70,7 +70,7 @@ pub async fn handle_eca_enrollment_certificate_request(
     let eca_port = GlobalConfig::global().eca_port;
     let req_addr = format!("{}:{}/successor-enrollment-certificate", eca_addr, eca_port);
 
-    let response_result = post_ra_to_eca(req_addr, successor_erollment_request, hash_id).await;
+    let response_result = post_ra_to_eca(req_addr, successor_enrollment_request, hash_id).await;
     match response_result {
         Ok(response) => {
             log::debug!("Received response from ECA");

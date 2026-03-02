@@ -25,7 +25,7 @@ use crate::persistence::eca_certificates::{
 
 use crate::ee_registration_interaction::{check_ee_registration, update_ee_status};
 
-/// Enpoint not specified by 1609.2 standard
+/// endpoint not specified by 1609.2 standard
 ///
 /// Called by RA to request C-OER encoded EcaEeCertResponseSpdu
 #[utoipa::path(
@@ -121,7 +121,7 @@ async fn handle_successor_enrollment_request(
 
     // 2. Call the ECA library
     let (filename, file, (vehicle_id, issuer_id)) =
-        oscms_bridge::eca_sucessor_enrollment_certificate_request_handler(
+        oscms_bridge::eca_successor_enrollment_certificate_request_handler(
             successor_enrollment_request,
             request_hash_id,
             eca_private_key,

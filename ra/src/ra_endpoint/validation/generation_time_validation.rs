@@ -117,8 +117,8 @@ fn validate(
     }
 
     // Throw /POST Error-Code 400-XX within XX-minWait.
-    // check if generation time > current time + minwaittime holds, else throw this error
-    // TODO check this, is it the oposite
+    // check if generation time > current time + min-wait-time holds, else throw this error
+    // TODO check this, is it the opposite
     if current_time < generation_time + min_wait {
         log::debug!(
             "Error-Code 400-XX within ra-minWait: generation_time: {}, current_time: {}, min_wait: {}",
@@ -246,7 +246,7 @@ mod tests {
             ) {
                 Ok(_) => {}
                 Err(e) => {
-                    panic!("No error Expecte at POST but got {:?}", e);
+                    panic!("No error expected at POST but got {:?}", e);
                 }
             }
         }

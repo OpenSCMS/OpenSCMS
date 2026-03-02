@@ -28,7 +28,7 @@ use sea_orm::DatabaseConnection;
 use sea_orm::EntityTrait;
 use sea_orm::QueryFilter;
 
-pub async fn fech_all_crls(db: &DatabaseConnection) -> Result<Vec<Vec<u8>>, PersistenceLoadError> {
+pub async fn fetch_all_crls(db: &DatabaseConnection) -> Result<Vec<Vec<u8>>, PersistenceLoadError> {
     let models = CrlStoreEntity::find().all(db).await?;
 
     let mut all_crl_files = Vec::new();
@@ -39,7 +39,7 @@ pub async fn fech_all_crls(db: &DatabaseConnection) -> Result<Vec<Vec<u8>>, Pers
     Ok(all_crl_files)
 }
 
-pub async fn fech_all_crls_models(
+pub async fn fetch_all_crls_models(
     db: &DatabaseConnection,
 ) -> Result<Vec<CrlStoreModel>, PersistenceLoadError> {
     let models = CrlStoreEntity::find().all(db).await?;

@@ -51,13 +51,13 @@ fn build_oscms() -> (String, String) {
         _ => "Debug", // default
     };
 
-    // If OSCMS_INSTALL_TARGET_DIR is definied, use it as the install target. Else use cmake default
+    // If OSCMS_INSTALL_TARGET_DIR is defined, use it as the install target. Else use cmake default
     let mut binding = cmake::Config::new(&oscms_codecs_bridge_path);
     let dst = binding.profile(cmake_profile);
     if !install_target.is_empty() {
         dst.define("CMAKE_INSTALL_PREFIX", install_target.clone())
             .define("CMAKE_INSTALL_LIBDIR", "lib")
-            .define("CMAKE_INSTALL_INCLUDIR", "include");
+            .define("CMAKE_INSTALL_INCLUDEDIR", "include");
     }
     let dst = dst.build();
 

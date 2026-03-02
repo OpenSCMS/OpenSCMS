@@ -34,8 +34,8 @@ use crate::ra_endpoint::common::oscms_error_to_ra_response_error;
 use crate::ra_endpoint::common::zip_helpers::write_file_to_zip;
 use crate::ra_endpoint::common::{
     decode_ieee1609dot2_authorization,
-    request_checker::check_ra_incomming_request_frequency_by_app_ip,
-    request_checker::check_ra_incomming_request_frequency_by_vid,
+    request_checker::check_ra_incoming_request_frequency_by_app_ip,
+    request_checker::check_ra_incoming_request_frequency_by_vid,
 };
 use crate::ra_endpoint::validation;
 use crate::ra_endpoint::worker::tasks::eca_public_key_download_and_store;
@@ -103,7 +103,7 @@ pub async fn request_auth_certificate(
                 .body("Failed parsing");
         }
     };
-    log::debug!("Receivede from {:?}", app_ip);
+    log::debug!("Received from {:?}", app_ip);
 
     let result = handle_post_request(req_body, app_ip, &data.db, &data.celery_app).await;
     match result {
@@ -119,7 +119,7 @@ pub struct CertFilename {
     filename: Option<String>,
 }
 
-/// 1609.2.1 SS 6.3.5.3 Authorization Certificate Downoad
+/// 1609.2.1 SS 6.3.5.3 Authorization Certificate download
 ///
 /// Download a generated RA Certificate
 #[utoipa::path(
@@ -177,7 +177,7 @@ pub async fn download_auth_certificate(
     // 2) Authorization certificate download with filename in URL
     //      If scmsV3-eeAuth = enrollment: Ieee-1609.2.1-Authorization:
     //      EeRaDownloadRequestSpdu. The request is invalid if the
-    //      eeRaDownlaodRequest.filename field is not equal to the query parameter
+    //      eeRaDownloadRequest.filename field is not equal to the query parameter
     //      filename provided in the request path.
     //      get header ieee1609dot2_authorization_encoded
 
@@ -227,7 +227,7 @@ pub async fn download_auth_certificate(
     // At this point we can have:
     // 1) query_param_filename not empty and ieee1609dot2_authorization_encoded not empty.
     //     So It's corresponds to situation 2) Authorization certificate download with filename in URL.
-    //     And The request is invalid if the eeRaDownlaodRequest.filename field is not equal to the query parameter
+    //     And The request is invalid if the eeRaDownloadRequest.filename field is not equal to the query parameter
     //     filename provided in the request path.
     // 2) query_param_filename not empty and ieee1609dot2_authorization_encoded empty.
     //    So It's corresponds to situation 2) Authorization certificate download with filename in URL.
@@ -319,12 +319,12 @@ async fn handle_post_request(
         certificate_validity_start
     );
 
-    // Composing ACK righ now
+    // Composing ACK right now
     let ack_response = certificate_request_ack_response(encoded, db).await?;
     log::debug!("ACK response composed successfully");
 
     // Validate request frequency
-    check_ra_incomming_request_frequency_by_vid(
+    check_ra_incoming_request_frequency_by_vid(
         app_ip,
         vid,
         time_request_received,
@@ -515,7 +515,7 @@ async fn handle_get_request(
     // TODO: Not covering - lack of details from standard
     // 400-81 wrong RA.
 
-    // ETDES-694: We first need to handle EeRaDownloadRequestSpdu as signed encrypted data
+    // We first need to handle EeRaDownloadRequestSpdu as signed encrypted data
     // and so we'll be able to fetch Enrollment Certificate and apply validations:
     // Throw /GET Error-Code 400-20 blocked enrollment certificate.
     // Throw /GET Error-Code 400-21 unregistered enrollment certificate.
@@ -523,7 +523,7 @@ async fn handle_get_request(
     // Throw /GET Error-Code 400-712 outside enrollment certificate’s validityPeriod.
 
     // Validate request frequency
-    check_ra_incomming_request_frequency_by_app_ip(
+    check_ra_incoming_request_frequency_by_app_ip(
         app_ip,
         time_request_received,
         RaRequestManagementRequestType::AuthorizationDownload,
@@ -658,7 +658,7 @@ fn extract_hash_id_from_ieee1609dot2_filename(
 
         let filename_parts: Vec<&str> = filename.split(".").collect();
         if filename_parts.len() != 2 {
-            // Throw /GET Errpr-Code 400-42 failed parsing
+            // Throw /GET Error-Code 400-42 failed parsing
             return Err(errors::HandleResponseError::new(
                 "Failed to parse request hash_id from spdu",
                 StatusCode::BAD_REQUEST,
@@ -676,7 +676,7 @@ fn extract_hash_id_from_ieee1609dot2_filename(
 
         return Ok((hash_id, i_value));
     } else if parts.len() != 2 {
-        // Throw /GET Errpr-Code 400-42 failed parsing
+        // Throw /GET Error-Code 400-42 failed parsing
         return Err(errors::HandleResponseError::new(
             "Failed to parse request hash_id from spdu",
             StatusCode::BAD_REQUEST,
@@ -696,7 +696,7 @@ fn extract_hash_id_from_ieee1609dot2_filename(
             Some(hash_id) => hash_id.as_str(),
             None => {
                 log::debug!("Unable to extract hash_id from {}", filename);
-                // Throw /GET Errpr-Code 400-42 failed parsing
+                // Throw /GET Error-Code 400-42 failed parsing
                 return Err(errors::HandleResponseError::new(
                     "Invalid hash id from filename",
                     StatusCode::BAD_REQUEST,
@@ -711,7 +711,7 @@ fn extract_hash_id_from_ieee1609dot2_filename(
             Some(i_value) => i_value.as_str(),
             None => {
                 log::debug!("Unable to extract i_value_str from {}", filename);
-                // Throw /GET Errpr-Code 400-42 failed parsing
+                // Throw /GET Error-Code 400-42 failed parsing
                 return Err(errors::HandleResponseError::new(
                     "i-value from filename not found",
                     StatusCode::BAD_REQUEST,
@@ -733,7 +733,7 @@ fn extract_hash_id_from_ieee1609dot2_filename(
                 }
                 None => {
                     log::debug!("Unable to cast i_value_str to u64 {}", i_value_str);
-                    // Throw /GET Errpr-Code 400-42 failed parsing
+                    // Throw /GET Error-Code 400-42 failed parsing
                     return Err(errors::HandleResponseError::new(
                         "Invalid hex i-value from filename",
                         StatusCode::BAD_REQUEST,
@@ -754,7 +754,7 @@ fn extract_hash_id_from_ieee1609dot2_filename(
                 }
                 None => {
                     log::debug!("Unable to cast i_value_str to u64 {}", i_value_str);
-                    // Throw /GET Errpr-Code 400-42 failed parsing
+                    // Throw /GET Error-Code 400-42 failed parsing
                     return Err(errors::HandleResponseError::new(
                         "Invalid dec i-value from filename",
                         StatusCode::BAD_REQUEST,
@@ -766,7 +766,7 @@ fn extract_hash_id_from_ieee1609dot2_filename(
             }
         };
     }
-    // Throw /GET Errpr-Code 400-42 failed parsing
+    // Throw /GET Error-Code 400-42 failed parsing
     Err(errors::HandleResponseError::new(
         "Unable to extract hash_id and i_value from filename",
         StatusCode::BAD_REQUEST,
@@ -941,7 +941,7 @@ mod tests {
         let result = extract_hash_id_from_ieee1609dot2_filename(filename);
         assert!(result.is_err());
 
-        // 7. 00 ivalue
+        // 7. 00 i-value
         let filename = "df64afcb3a3edcf3_00.zip".to_string();
         let result = extract_hash_id_from_ieee1609dot2_filename(filename);
         assert!(result.is_ok());

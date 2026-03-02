@@ -99,7 +99,7 @@ async fn handle_post_request(
     // TODO: 400-80 wrong ECA.
 
     // Validate request frequency
-    check_eca_incomming_request_frequency(app_ip, time_request_received, db).await?;
+    check_eca_incoming_request_frequency(app_ip, time_request_received, db).await?;
 
     // 1. Load input data
     let enrollment_certificate_request = req_body.to_vec();
@@ -199,7 +199,7 @@ async fn handle_post_request(
     Ok(certificate)
 }
 
-async fn check_eca_incomming_request_frequency(
+async fn check_eca_incoming_request_frequency(
     app_ip: Option<String>,
     request_time: u32,
     db: &DatabaseConnection,

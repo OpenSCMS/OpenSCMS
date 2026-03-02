@@ -30,7 +30,7 @@ pub fn decode_download_request_spdu(
     eca_certificate: Vec<u8>,
 ) -> Result<(u32, String), OscmsBridgeError> {
     log::debug!(
-        "OSMCS-BRIDGE: Decoding download request SPDU: {:?}",
+        "OSCMS-BRIDGE: Decoding download request SPDU: {:?}",
         encoded_ee_ra_download_request.len()
     );
 

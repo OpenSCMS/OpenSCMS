@@ -19,7 +19,7 @@ use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 
 /// There is one PayloadLaToRa per LA.
-/// Potentially inside the RA it needs to handle two PaylodLaToRa objects.
+/// Potentially inside the RA it needs to handle two PayloadLaToRa objects.
 #[derive(Debug, Serialize, Deserialize, PartialEq, Clone, ToSchema)]
 pub struct PayloadLaToRa {
     pub request_id: String, // The request_id is associated with a bundle of caterpillars, i.e. a unique request from RA.

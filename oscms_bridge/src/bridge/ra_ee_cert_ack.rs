@@ -35,11 +35,11 @@ use scmscommon::{get_current_time_period_days, get_current_time_seconds};
 /// # Returns
 ///
 /// A `Result` containing the encoded acknowledgment message as a vector of bytes (`Vec<u8>`) if successful,
-/// or a `Lgasn1609Error` if encoding encounters an error during execution.
+/// or an `OscmsBridgeError` if encoding encounters an error during execution.
 ///
 /// # Errors
 ///
-/// Returns a `Lgasn1609Error` if encoding encounters an error during execution or if the encoded output is empty.
+/// Returns an `OscmsBridgeError` if encoding encounters an error during execution or if the encoded output is empty.
 ///
 /// # Safety
 ///

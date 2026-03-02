@@ -158,7 +158,7 @@ fn combine_f_value_with_i_and_j(
     y_s.extend_from_slice(&xs_2_xor);
     y_s.extend_from_slice(&xs_3_xor);
 
-    // start part for debuging --------------------------
+    // start part for debugging --------------------------
     let hex_string = hex::encode(&y_s);
     log::debug!("y_s hex_string: {:?}", hex_string);
     log::debug!(
@@ -365,19 +365,19 @@ mod tests {
         assert_eq!(expanded_pub_key_hex, expected_hex);
 
         // Test adding
-        let pub_key_encryp: Vec<u8> = vec![
+        let pub_key_encrypt: Vec<u8> = vec![
             4, 209, 149, 60, 128, 119, 102, 179, 251, 58, 140, 112, 33, 35, 117, 142, 104, 62, 232,
             26, 210, 241, 231, 242, 241, 121, 224, 36, 5, 222, 17, 230, 170, 61, 184, 26, 232, 72,
             157, 4, 4, 95, 102, 167, 38, 9, 130, 112, 214, 51, 187, 220, 36, 126, 216, 60, 186,
             119, 217, 195, 115, 55, 155, 252, 169,
         ];
         let e_verifying_key =
-            VerifyingKey::from_encoded_point(&EncodedPoint::from_bytes(&pub_key_encryp).unwrap())
+            VerifyingKey::from_encoded_point(&EncodedPoint::from_bytes(&pub_key_encrypt).unwrap())
                 .unwrap();
 
         assert_eq!(
             e_verifying_key.to_encoded_point(false).as_bytes(),
-            pub_key_encryp
+            pub_key_encrypt
         );
 
         // Add

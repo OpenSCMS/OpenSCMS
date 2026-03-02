@@ -49,7 +49,7 @@ fn generate_cocoon_request_and_client_mapping(
     let mut requests: Vec<ClientRequestsMappingEntry> = Vec::new();
 
     for caterpillar_eplv in list_caterpillar_eplv {
-        // In the ClientMapping we use the hash_id to know which certificate belogs to which client.
+        // In the ClientMapping we use the hash_id to know which certificate belongs to which client.
         // The EE will use the hash_id so that we can retrieve the correct zip file.
         let hash_id = caterpillar_eplv.caterpillar.get_hash_id();
         let f_encrypt = caterpillar_eplv.caterpillar.f_encrypt();
@@ -89,7 +89,7 @@ fn generate_cocoon_request_and_client_mapping(
             if result.is_err() {
                 return Err(ScmsInternalCommError::new(
                     format!(
-                        "Error in expasion function in create_cocoon_pub_key: {:?}",
+                        "Error in expansion function in create_cocoon_pub_key: {:?}",
                         result.err()
                     )
                     .as_str(),
@@ -131,9 +131,9 @@ struct CaterpillarEplvs {
 }
 
 /// Each Caterpillar has associated with it two lists of EPLVs each from an LA, if we have two LAs.
-/// This funcion is used to combine the `caterpillar` and `payloads_la_to_ra` so we can create a simpler
+/// This function is used to combine the `caterpillar` and `payloads_la_to_ra` so we can create a simpler
 /// object which contains a caterpillar and associated EPLVs of that caterpillar,
-/// in aneasy to access form.
+/// in an easy to access form.
 fn associate_caterpillar_with_eplv(
     caterpillars: Vec<Caterpillar>,
     payloads_la_to_ra: Vec<PayloadLaToRa>, // In the case of two LAs there are two items in this list
@@ -182,7 +182,7 @@ fn associate_caterpillar_with_eplv(
 
 /// This is an auxiliary function, each CaterpillarEplv has inside of it a field called
 /// eplvs_la_matrix, which is a matrix with two lines (in the case of two LAs).
-/// Each line has inside of it a `Vec<Eplv>`.  
+/// Each line has inside of it a `Vec<Eplv>`.
 /// One caterpillar is associated with one EE request.
 /// If the EE is asking certificates for 4 periods and in each period we have 10 certificates.
 /// We'll have to send 40 certificates in total, for each EE request.

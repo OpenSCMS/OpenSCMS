@@ -34,11 +34,11 @@ fn client_with_middleware() -> ClientWithMiddleware {
 
 async fn get_eca_to_ra(
     req_addr: String,
-    caninical_id: Option<String>,
+    canonical_id: Option<String>,
     device_id: Option<u64>,
 ) -> Result<reqwest::Response, reqwest_middleware::Error> {
     let client = client_with_middleware();
-    if let Some(canonical_id) = caninical_id.as_ref() {
+    if let Some(canonical_id) = canonical_id.as_ref() {
         log::debug!("Requesting RA info by canonical ID: {}", canonical_id);
         return client
             .get(req_addr)
@@ -94,11 +94,11 @@ pub async fn check_ee_registration(
         Ok(response) => {
             if !response.status().is_success() {
                 log::error!(
-                    "Canonical ID not registed, status code: {}",
+                    "Canonical ID not registered, status code: {}",
                     response.status()
                 );
                 return Err(errors::HandleResponseError::new(
-                    "Canonical ID not registed",
+                    "Canonical ID not registered",
                     StatusCode::BAD_REQUEST,
                     Ieee1609Dot2Dot1ErrorCodes::NotDefined,
                 ));

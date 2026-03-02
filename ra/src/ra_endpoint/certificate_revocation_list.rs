@@ -18,7 +18,7 @@ use crate::persistence::composite_crl_store::{
     fetch_composite_crl_by_ctl_series_id, store_composite_crl,
 };
 use crate::persistence::crl_store::{
-    fech_all_crls, fetch_crl_by_crl_series_and_or_cracaid, store_crl,
+    fetch_all_crls, fetch_crl_by_crl_series_and_or_cracaid, store_crl,
 };
 use crate::persistence::ctl_store::fetch_ctl_file_by_ctl_series_id;
 use crate::persistence::ra_certificates::{latest_ra_certificate, latest_ra_private_key};
@@ -146,7 +146,7 @@ pub async fn build_and_store_composite_crl(
     );
 
     // Fetch all available CRL
-    let mut crl_list = fech_all_crls(db).await?;
+    let mut crl_list = fetch_all_crls(db).await?;
 
     // if no CRLs are available, we need to create it
     if crl_list.is_empty() {

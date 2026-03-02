@@ -44,7 +44,7 @@ use byteorder::{ByteOrder, LittleEndian};
 /// # Returns
 ///
 /// * `Ok(Vec<u8>)` - A vector of bytes containing the certificate response if the operation is successful.
-/// * `Err(Lgasn1609Error)` - An error of type `Lgasn1609Error` if the operation fails.
+/// * `Err(OscmsBridgeError)` - An error of type `OscmsBridgeError` if the operation fails.
 ///
 /// # Errors
 ///

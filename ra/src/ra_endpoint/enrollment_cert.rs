@@ -21,7 +21,7 @@ use crate::persistence::ra_certificates::{
 use crate::persistence::successor_enrollment_certificate_store::{
     download_enrollment_certificate, store_enrollment_request_to_be_processed,
 };
-use crate::ra_endpoint::common::request_checker::check_ra_incomming_request_frequency_by_app_ip;
+use crate::ra_endpoint::common::request_checker::check_ra_incoming_request_frequency_by_app_ip;
 use crate::ra_endpoint::common::{
     decode_ieee1609dot2_authorization, oscms_error_to_ra_response_error,
 };
@@ -90,7 +90,7 @@ pub async fn request_successor_enrollment_certificate(
 
     // Time received
     let time_request_received = get_current_time_seconds();
-    log::debug!("Receivede from {:?} at {}", app_ip, time_request_received);
+    log::debug!("Received from {:?} at {}", app_ip, time_request_received);
 
     let result = handle_successor_post_request(
         req_body,
@@ -162,7 +162,7 @@ pub async fn download_successor_certificate(
 
     // Time received
     let time_request_received = get_current_time_seconds();
-    log::debug!("Receivede from {:?} at {}", app_ip, time_request_received);
+    log::debug!("Received from {:?} at {}", app_ip, time_request_received);
 
     // Get header Ieee-1609.2.1-Authorization. If it's empty so we have situation 2)
     let ieee1609dot2_authorization_encoded: Option<String> = req
@@ -219,7 +219,7 @@ async fn handle_successor_get_request(
     // TODO: Not covering - lack of details from standard
     // 400-81 wrong RA.
 
-    // ETDES-694: We first need to handle EeRaDownloadRequestSpdu as signed encrypted data
+    // We first need to handle EeRaDownloadRequestSpdu as signed encrypted data
     // and so we'll be able to fetch Enrollment Certificate and apply validations:
     // Throw /GET Error-Code 400-20 blocked enrollment certificate.
     // Throw /GET Error-Code 400-21 unregistered enrollment certificate.
@@ -227,7 +227,7 @@ async fn handle_successor_get_request(
     // Throw /GET Error-Code 400-712 outside enrollment certificate’s validityPeriod.
 
     // Validate request frequency
-    check_ra_incomming_request_frequency_by_app_ip(
+    check_ra_incoming_request_frequency_by_app_ip(
         app_ip,
         time_request_received,
         RaRequestManagementRequestType::SuccessorEnrollmentDownload,
@@ -320,12 +320,12 @@ async fn handle_successor_post_request(
     // 400-81 wrong RA.
     // 400-710 outside ra-maxOverlap.
 
-    // ETDES-687 TODO: Throw /POST Error code: 400-20 blocked enrollment certificate.
-    // ETDES-686 TODO: Throw /POST Error code: 400-21 unregistered enrollment certificate.
+    // TODO: Throw /POST Error code: 400-20 blocked enrollment certificate.
+    // TODO: Throw /POST Error code: 400-21 unregistered enrollment certificate.
     // As per 4.1.4.3.1, we have to check for unregistered & blocked EE enrollment certificate
 
     // Validate request frequency
-    check_ra_incomming_request_frequency_by_app_ip(
+    check_ra_incoming_request_frequency_by_app_ip(
         app_ip,
         time_request_received,
         RaRequestManagementRequestType::SuccessorEnrollmentRequest,
@@ -333,7 +333,7 @@ async fn handle_successor_post_request(
     )
     .await?;
 
-    // 1. Processing the requesst by calling lib1609
+    // 1. Processing the request by calling lib1609
     let encoded = req_body.to_vec();
     let ra_private_key = latest_ra_private_key(db).await?;
     let ra_enc_private_key = latest_ra_enc_private_key(db).await?;
@@ -342,7 +342,7 @@ async fn handle_successor_post_request(
     log::debug!("Handling successor enrollment certificate request by calling lib1609",);
 
     let (ack_message, decoded_payload, hash_id) =
-        match oscms_bridge::ra_sucessor_enrollment_certificate_request_handler(
+        match oscms_bridge::ra_successor_enrollment_certificate_request_handler(
             encoded.clone(),
             ra_private_key,
             ra_enc_private_key,
@@ -377,7 +377,7 @@ async fn handle_successor_post_request(
         }
     };
 
-    log::debug!("Seding task to be processed by worker.");
+    log::debug!("Sending task to be processed by worker.");
     if let Some(celery_app) = celery_app {
         celery_app
             .send_task(run_successor_enrollment_request::new(hash_id.clone()))

@@ -37,7 +37,7 @@ pub async fn setup_tables(db: &DatabaseConnection) -> Result<(), DbErr> {
 }
 
 async fn setup_stored_procedures(db: &DatabaseConnection) -> Result<(), DbErr> {
-    let create_procedure_stms = vec![
+    let create_procedure_statements = vec![
         "DROP PROCEDURE IF EXISTS SelectCaterpillarsIfEnough ",
         r#"
         CREATE PROCEDURE SelectCaterpillarsIfEnough(IN threshold INT, IN exp_type_param VARCHAR(255))
@@ -79,7 +79,7 @@ async fn setup_stored_procedures(db: &DatabaseConnection) -> Result<(), DbErr> {
     ];
 
     // Execute the creation of the procedure
-    for stmt in create_procedure_stms {
+    for stmt in create_procedure_statements {
         match db.execute_unprepared(stmt).await {
             Ok(_) => {}
             Err(e) => {
