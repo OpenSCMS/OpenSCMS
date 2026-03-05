@@ -20,20 +20,13 @@
 # It can also be pulled from the main repo to use as a base image for a development
 # environment in vscode.
 
-FROM rust:1-bookworm
+FROM rust:1-trixie
 
 # Install all basic tools - not build dependencies. We do them last to maximize layer cacheing
 RUN DEBIAN_FRONTEND=noninteractive apt-get update -qy && \
     DEBIAN_FRONTEND=noninteractive apt-get -qy install \
-    clang
-
-# Install the specific version of cmake we want. Ubuntu 24.04 comes with 3.28 which might be good enough,
-# but we might as well future proof ourselves.
-RUN wget -q https://github.com/Kitware/CMake/releases/download/v3.31.5/cmake-3.31.5-linux-x86_64.sh && \
-    chmod +x ./cmake-3.31.5-linux-x86_64.sh && \
-    sh ./cmake-3.31.5-linux-x86_64.sh --skip-license --prefix=/usr/local && \
-    rm ./cmake-3.31.5-linux-x86_64.sh
-
+    clang \
+    cmake
 
 # Install anything needed to compile successfully
 RUN DEBIAN_FRONTEND=noninteractive apt-get -qy install \
@@ -53,9 +46,7 @@ RUN rm -rf /var/lib/apt/lists
 #
 # Note we install, and use, it globally (see https://github.com/devops-works/binenv/blob/develop/SYSTEM.md)
 #
-# Do this last, as .binenv.lock can change with each MR. That maximizes layer reuse
 ENV BINENV_GLOBAL=true
-COPY .binenv.lock ./.binenv.lock
 RUN wget -q https://github.com/devops-works/binenv/releases/download/v0.19.0/binenv_linux_amd64 && \
     wget -q https://github.com/devops-works/binenv/releases/download/v0.19.0/checksums.txt && \
     sha256sum  --check --ignore-missing checksums.txt && \
@@ -63,8 +54,12 @@ RUN wget -q https://github.com/devops-works/binenv/releases/download/v0.19.0/bin
     chmod +x binenv && \
     ./binenv -g update && \
     ./binenv -g install binenv && \
-    rm ./binenv && \
-    binenv -g install -l
+    rm ./binenv
 
+# Do this last, as .binenv.lock can change with each MR. That maximizes layer reuse
+COPY .binenv.lock ./.binenv.lock
+RUN binenv -g install -l
 
+# Cleanup the apt cache. If you need to install anything else, you will need to re-run apt update
+RUN rm -rf /var/lib/apt/lists
 

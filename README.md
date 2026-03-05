@@ -35,6 +35,7 @@ For a full description of the OpenSCMS project see the [main README](<https://gi
   - [Setting up Rust](#setting-up-rust)
   - [Setting up Minikube for Testing](#setting-up-minikube-for-testing)
   - [Using Docker for Development](#using-docker-for-development)
+  - [This is not the docker file you are looking for](#this-is-not-the-docker-file-you-are-looking-for)
 - [Running the Server In Minikube](#running-the-server-in-minikube)
 - [Exploring the Server](#exploring-the-server)
 - [Contributing](#contributing)
@@ -115,26 +116,32 @@ See the separate [Minikube Setup Instructions](./MINIKUBE_SETUP.md)
 
 ### Using Docker for Development
 
-Alternatively, you can use the docker file provided in the repository found at `docker/openscms-server-ci.dockerfile` . This is the image used for all CI jobs during the initial development. It provides a basic environment for building, running clippy or formatting the source, and for running the unit tests. But it is not suitable for deploying to minikube. This is not the same as the `Dockerfile` in the root of the repository - that one is used by `skaffold` when deploying to `minikube`.
+Alternatively, you can use the docker image and file provided in the [oscms-ci-docker](https://github.com/OpenSCMS/oscms-ci-docker/blob/main/openscms-server-ci.dockerfile) repository. This is the image used for all CI jobs. It provides a basic environment for building, running clippy or formatting the source, and for running the unit tests. But it is not suitable for deploying to minikube.
 
-For that, you will still need to install Rust and the dependencies on your host machine.
+This is not the same as the `Dockerfile` in the root of the repository - that one is used by `skaffold` when deploying to `minikube`. For that, you will still need to install Rust and the dependencies on your host machine.
 
-Now change to the directory where you cloned this repository and build the image as follows
+The simplest approach is to pull the provided image into your local store
 
 ```bash
-docker build -t oscms-server-docker . -f docker/openscms-server-ci.dockerfile
+docker pull ghcr.io/openscms/openscms-server-ci-docker:latest
 ```
 
- Now run the container thus
+Now run the container thus
 
 ```bash
 docker run -ti --rm --volume $PWD:/WORK --user $(id -u):$(id -g) \
-       oscms-server-docker
+       ghcr.io/openscms/oscms-server-ci-docker:latest
 ```
 
 This will place you in a `bash` shell within the container, with your cloned source available at `/WORK`. Your user inside the container will have the same group and user id as on your host, so any changes you make will have the correct permissions.
 
 It should also be possible to use this image as a `VS Code` development container. The development team has not used it in this way, so if it doesn't work ... contributions are welcome.
+
+### This is not the docker file you are looking for
+
+Ignore the file living in the `.gitlab-ci` sub-directory. This was used during development, which occurred in an environment using Gitlab instead of GitHub. It, and the related YAML files, are retained as examples for those who may be thinking of forking this onto Gitlab
+
+The docker file in the `oscms-ci-docker` repository will always be the authoritative version.
 
 ## Running the Server In Minikube
 
