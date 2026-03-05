@@ -16,20 +16,24 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-FROM rust:1-bookworm
+FROM rust:1-trixie
 
-# Installing dependencies for bindgen
-RUN apt-get update && \
-    apt-get install -y llvm-dev && \
-    apt-get install -y libclang-dev && \
-    apt-get install -y clang
+# Install all basic tools - not build dependencies. We do them last to maximize layer caching
+RUN DEBIAN_FRONTEND=noninteractive apt-get update -qy && \
+    DEBIAN_FRONTEND=noninteractive apt-get -qy install \
+    clang \
+    cmake \
+    iputils-ping
 
-RUN wget -q https://github.com/Kitware/CMake/releases/download/v3.31.5/cmake-3.31.5-linux-x86_64.sh && \
-    chmod +x ./cmake-3.31.5-linux-x86_64.sh && \
-    sh ./cmake-3.31.5-linux-x86_64.sh --skip-license --prefix=/usr/local && \
-    rm ./cmake-3.31.5-linux-x86_64.sh
+# Install anything needed to compile successfully
+RUN DEBIAN_FRONTEND=noninteractive apt-get -qy install \
+    libclang-dev \
+    llvm-dev \
+    libzip-dev \
+    libssl-dev
 
-RUN apt-get install -y iputils-ping
+# Cleanup the apt cache. If you need to install anything else, you will need to re-run apt update
+RUN rm -rf /var/lib/apt/lists
 
 RUN useradd --create-home --home /home/app scmsuser
 
@@ -37,11 +41,11 @@ WORKDIR /home/app
 
 USER scmsuser
 COPY --chown=scmsuser ./certs /certs
+COPY --chown=scmsuser --exclude=./certs . .
 
 ENV OSCMS_INSTALL_TARGET_DIR=/home/app/oscms_install
 ENV LD_LIBRARY_PATH=$OSCMS_INSTALL_TARGET_DIR/lib:$LD_LIBRARY_PATH
 
-COPY --chown=scmsuser --exclude=./certs . .
 RUN cargo fetch --locked
 RUN cargo build --frozen
 

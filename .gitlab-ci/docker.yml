@@ -49,7 +49,7 @@ build docker ci image:
       --label "org.opencontainers.image.revision=$CI_COMMIT_SHA"
       --label "org.opencontainers.image.version=$CI_COMMIT_REF_NAME"
       --tag $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
-      --file docker/openscms-server-ci.dockerfile
+      --file .gitlab-ci/gitlab-ci.dockerfile
       .
     - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
 
