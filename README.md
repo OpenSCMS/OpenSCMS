@@ -123,7 +123,7 @@ This is not the same as the `Dockerfile` in the root of the repository - that on
 The simplest approach is to pull the provided image into your local store
 
 ```bash
-docker pull ghcr.io/openscms/openscms-server-ci-docker:latest
+docker pull ghcr.io/openscms/oscms-server-ci-docker:latest
 ```
 
 Now run the container thus
