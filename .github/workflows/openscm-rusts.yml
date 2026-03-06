@@ -1,0 +1,66 @@
+# Copyright (c) 2026 LG Electronics, Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http:#www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# SPDX-License-Identifier: Apache-2.0
+
+name: OpenSCMS/OpenSCMS
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+
+env:
+  CARGO_TERM_COLOR: always
+  CI_IMAGE: ghcr.io/openscms/oscms-server-ci-docker:latest
+
+jobs:
+  qa-tests:
+    runs-on: ubuntu-latest
+
+    container:
+      image: ghcr.io/openscms/oscms-server-ci-docker:latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Check source code formatting
+        run: cargo fmt --check
+
+      - name: Lint source with clippy
+        run: cargo clippy --locked --no-deps --all-targets
+
+      - name: Check Helm chart for lint errors
+        run: helm lint -f deployment/values.yaml -f deployment/values-local.yaml ./deployment
+
+  # We run this in parallel with the qa tests to save overall time
+  # as this is the most time consuming job. It also checks that the
+  # code compiles.
+  unit-tests:
+    runs-on: ubuntu-latest
+
+    container:
+      image: ghcr.io/openscms/oscms-server-ci-docker:latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Run tests
+        run: scripts/cargo_unit_tests.sh
