@@ -67,6 +67,8 @@ The list of repositories, and their relative submodule dependencies is as follow
         - [etsi_ts103097-asn](<https://github.com/OpenSCMS/etsi_ts103097-asn>)
         - [ieee1609dot2dot1-asn](<https://github.com/OpenSCMS/ieee1609dot2dot1-asn>)
 
+The C projects also make use of the [Cmake Helpers project](https://github.com/OpenSCMS/oscms-cmake-helpers.git)
+
 ### Installing Dependencies for the C Code
 
 The following libraries need to be installed on your development machine.
